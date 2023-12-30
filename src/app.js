@@ -29,5 +29,15 @@ app.use(express.static("Public"))
 app.use(cookieParser())
 
 
+// Routes importing
+
+import userRouter from './routes/user.route.js'
+
+// decraration of route using middleware always
+app.use("/api/v1/users",userRouter)
+
+
+
+
 
 export {app}

@@ -9,7 +9,7 @@ dotenv.config({
 connectDB()
 .then(()=>{
     app.listen(process.env.PORT||8000,()=>{
-        console.log("Serveer is stated")
+        console.log(`Serveer is stated at ${process.env.PORT}`)
     })
 })
 .catch((e)=>{
