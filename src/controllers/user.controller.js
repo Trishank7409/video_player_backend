@@ -2,6 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { Apierror } from "../utils/apiError.js";
 import { User } from "../models/user.model.js";
 import { uploadCloudinary } from "../utils/cloudinary.js";
+import { apiResponse } from "../utils/apiResponse.js";
 const registerUser= asyncHandler(async(req,res)=>{
     // get user detail from frontend or postman
     // validation- not empty
@@ -16,6 +17,9 @@ const registerUser= asyncHandler(async(req,res)=>{
    
    const {fullname, email, username, password}= req.body
    console.log("email :",email)
+   console.log("fullname :",fullname)
+   console.log("username :",username)
+   console.log("password :",password)
    
    if(
     [fullname, email, username, password].some((field)=>
@@ -26,26 +30,29 @@ const registerUser= asyncHandler(async(req,res)=>{
    }
 
 //    validation from db
-const existedUser= User.findOne({
+const existedUser= await User.findOne({
     $or:[{username}, {email}]
 }
 )
-console.log(existedUser)
+console.log("this is existed user:",existedUser)
 
 if(existedUser){
     throw new Apierror(409, "User already exist")
 }
 // file handling
-const avatarLocalPath=req.files?.avatar[0]?.path
-   console.log(req.files)
 
-const coverImageLocalPath=req.files?.coverImage[0]?.path
-console.log(req.files)
+
+const avatarLocalPath = req.files?.avatar?.[0]?.path;
+
+
+const coverImageLocalPath = req.files?.coverImage?.[0]?.path;
+console.log("This is req.file:",req.files);
+
 
 // verify image and avatar is uploaded or not
 
 if(!avatarLocalPath){
-    throw new Apierror(400,"Avatar image is required")
+    throw new Apierror(400,"Avatar image path is required")
 }
 
 // upload file on cloudinary
@@ -59,7 +66,7 @@ if(!avatar){
 }
 
 
-// make entry on DB as object
+// // make entry on DB as object
 
 const user=await User.create({
     fullname,
@@ -69,7 +76,7 @@ const user=await User.create({
     password,
     username:username.toLowerCase()
 })
-// check user is created or not by finding him and remove password and refresh token
+// // check user is created or not by finding him and remove password and refresh token
 
 const createdUser=await User.findById(user._id).select(
     "-password -refreshToken"
@@ -80,7 +87,7 @@ if(!createdUser){
 }
 
 
-// return response
+// // return response
 
 
    
