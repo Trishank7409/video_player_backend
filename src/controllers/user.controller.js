@@ -4,7 +4,7 @@ import { User } from "../models/user.model.js";
 import { uploadCloudinary } from "../utils/cloudinary.js";
 import { apiResponse } from "../utils/apiResponse.js";
 
-import { Jwt } from "jsonwebtoken";
+import  Jwt  from "jsonwebtoken";
 
 // method for generaing token
 const generateAccessTokenAndRefreshToken=async(userId)=>{
@@ -85,11 +85,14 @@ if(!avatarLocalPath){
 // upload file on cloudinary
 
 const avatar=await uploadCloudinary(avatarLocalPath)
+
+
 const coverImage=await uploadCloudinary(coverImageLocalPath)
 
 // again verify avatar is uploaded tocloudiary?
 if(!avatar){
     throw new Apierror(400,"Avatar image is not uploaded to cloudinary")
+    
 }
 
 
