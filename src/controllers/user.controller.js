@@ -275,6 +275,83 @@ try {
 })
 
 
+// Change current Password
+const changeCurrentPassword=asyncHandler(async(req,res)=>{
+    const {oldPassword, newPassword}=req.body
+    const user=await User.findById(req.user._id)
+    const isPasswordCorrect=await user.isPasswordCorrect(oldPassword)
+    if(!isPasswordCorrect){
+        throw new Apierror(401, "invalid password")
+    }
+    user.password=newPassword
+    await user.save({validateBeforeSave:false})
+    res.status(200).json(
+        new apiResponse(200,{},"password changed")
+    ) 
+
+})
+
+// Get current user
+
+const getCurrentUser=asyncHandler(async(req,res)=>{
+    const user=await User.findById(req.user._id).select(
+        "-password -refreshToken"
+    )
+    res.status(200).json(
+        new apiResponse(200,user,"user fetched")
+    )
+})
+
+// update account detail
+
+const updateAccountDetail=asyncHandler(async(req,res)=>{
+    const {fullname, email}=req.body
+    if(!(fullname||email)){
+        throw new Apierror(400,'please provide at least one field to update')
+    }
+    const user=await User.findByIdAndUpdate(
+        req.user?._id,
+        {
+            $set:{
+                fullname,
+                email
+            }
+        },{new:true}).select("-password ")
+        
+    return res.status(200).json(
+        new apiResponse(200,user,"user updated")
+    )
+})
+
+// update files
+
+const updateUserAvatar=asyncHandler(async(req,res)=>{
+    const avatarLocalPath=req.file?.path
+
+    if(!avatarLocalPath){
+        throw new Apierror(400,"Avatar File is Missing")
+    }
+
+    const avatar =await uploadCloudinary(avatarLocalPath)
+
+    if(!avatar.url){
+        throw new Apierror(400,"Avatar image is not uploaded to cloudinary")
+       
+    }
+    const user=await User.findByIdAndUpdate(
+        req.user?._id,
+        {
+            $set:{
+                avatar:avatar.url
+            }
+        },{new:true}).select("-password ")
+    return res.status(200).json(
+        new apiResponse(200,user,"user updated")
+    )
 
 
-export {registerUser, loginUser, loggedOutUser,refreshAccessToken}
+})
+
+
+
+export {registerUser, loginUser, loggedOutUser,refreshAccessToken, getCurrentUser, changeCurrentPassword, updateAccountDetail}
