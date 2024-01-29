@@ -5,6 +5,7 @@ import { uploadCloudinary } from "../utils/cloudinary.js";
 import { apiResponse } from "../utils/apiResponse.js";
 
 import Jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 
 // method for generaing token
 const generateAccessTokenAndRefreshToken = async (userId) => {
@@ -36,7 +37,7 @@ const registerUser = asyncHandler(async (req, res) => {
   // validation- not empty
   // check if user already exist:username, email
   // chck for images and then avatar
-  // upload to cloudinary
+  // upload to cloudinary 
   // creaate user object for mongodb-create entry in db
   // remove password and refresh token field from repomnse
   // check  for user creation
@@ -370,13 +371,11 @@ const getChannelUserProfile = asyncHandler(async (req, res) => {
   if (!username?.trim()) {
     throw new Apierror(400, "username is required");
   }
-});
-
-// Mongodb Agrregate
-
-const channel = await User.aggregate([
-    { $match: { username: username?.toLowerCase() } },
-    {
+  const channel = await User.aggregate([
+      {
+       $match: { username: username?.toLowerCase() } 
+      },
+      {
         $lookup: {
           from: "subscriptions",
           localField: "_id",
@@ -423,11 +422,70 @@ const channel = await User.aggregate([
         },
       }
   ]);
-
   if(!channel?.length){
     throw new Apierror(404, "channel not found");
   }
   return res.status(200).json(new apiResponse(200, channel[0], "user fetched"));
+});
+
+// GEt user watch history
+
+const getwatchHistory=asyncHandler(async(req,res)=>{
+  const user=await User.aggregate([
+    {
+      $match: {
+          _id:new mongoose.Types.ObjectId(req.user?._id)
+          }
+  },
+  {
+    $lookup: {
+      from: "videos",
+      localField: "watchHistory",
+      foreignField: "_id",
+      as: "watchHistory",
+      pipeline:[
+        {
+          $lookup:{
+            from: "users",
+            localField: "owner",
+            foreignField: "_id",
+            as: "owner",
+            pipeline:[
+              {
+                $project:{
+                  fullname:1,
+                  username:1,
+                  avatar:1
+
+                }
+              }
+            ]
+          }
+        },
+        {
+          $addFields:{
+            owner:{
+              $arrayElemAt:["$owner",0]
+            }
+          }
+        }
+      ]
+    }
+  }
+
+  ])
+
+  return res
+  
+ .status(200)
+ .json(new apiResponse(
+  200,
+  user[0].watchHistory,
+  "watch History fetched"
+ ));
+
+})
+
 
 export {
   registerUser,
@@ -440,4 +498,5 @@ export {
   updateCoverImage,
   updateUserAvatar,
   getChannelUserProfile,
+  getwatchHistory
 };
