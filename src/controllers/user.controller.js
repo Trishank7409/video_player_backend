@@ -196,8 +196,8 @@ const loggedOutUser = asyncHandler(async (req, res) => {
   await User.findByIdAndUpdate(
     req.user._id,
     {
-      $set: {
-        refreshToken: undefined,
+      $unset: {
+        refreshToken: 1,
       },
     },
     {
@@ -272,9 +272,14 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 // Change current Password
 const changeCurrentPassword = asyncHandler(async (req, res) => {
   const { oldPassword, newPassword } = req.body;
+  
   const user = await User.findById(req.user._id);
-  const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
-  if (!isPasswordCorrect) {
+  // console.log("User ID:", req.user);
+  if (!user) {
+    throw new Apierror(404, "User not found");
+  }
+  const ispasswordCorrect = await user.isPasswordCorrect(oldPassword);
+  if (!ispasswordCorrect) {
     throw new Apierror(401, "invalid password");
   }
   user.password = newPassword;

@@ -14,7 +14,7 @@ try {
       }
     const decodedJWT=Jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
     
-    const user=User.findById(decodedJWT?._id).select("-refreshToken -password")
+    const user=await User.findById(decodedJWT?._id).select("-refreshToken -password")
     
     if(!user){
         throw new Apierror(403,"Invalid access token")
