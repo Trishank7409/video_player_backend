@@ -32,9 +32,17 @@ app.use(cookieParser())
 // Routes importing
 
 import userRouter from './routes/user.route.js'
+import commentRouter from './routes/comment.route.js'
+import likesRouter from './routes/likes.route.js'
+import playlistRouter from './routes/playlist.route.js'
+import tweetRouter from './routes/tweet.route.js'
 
 // decraration of route using middleware always
 app.use("/api/v1/users",userRouter)
+app.use("/api/v1/comments",commentRouter)
+app.use("/api/v1/likes",likesRouter)
+app.use("/api/v1/playlist",playlistRouter)
+app.use("/api/v1/tweet",tweetRouter)
 
 
 

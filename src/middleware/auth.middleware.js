@@ -10,7 +10,7 @@ try {
       const token=  req.cookies?.accessToken||req.header("Authorization")?.replace("Bearer ","")
     
       if(!token){
-        throw new Apierror(402,"Unautorised access")
+        throw new Apierror(402,"token not recieved")
       }
     const decodedJWT=Jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
     
